@@ -364,7 +364,7 @@ namespace OutlookGoogleCalendarSync.GoogleOgcs {
                 ev.Location = ai.Location;
             ev.Visibility = getPrivacy(ai.Sensitivity, null);
             ev.Transparency = getAvailability(ai.BusyStatus, null);
-            ev.ColorId = getColour(ai.Categories, null).Id;
+            ev.ColorId = getColour(ai.BusyStatus, ai.Categories, null).Id;
 
             ev.Attendees = new List<Google.Apis.Calendar.v3.Data.EventAttendee>();
             if (Settings.Instance.AddAttendees && ai.Recipients.Count > 1 && !APIlimitReached_attendee) { //Don't add attendees if there's only 1 (me)
@@ -659,7 +659,7 @@ namespace OutlookGoogleCalendarSync.GoogleOgcs {
             }
 
             Palette gColour = this.ColourPalette.GetColour(ev.ColorId);
-            Palette oColour = getColour(ai.Categories, gColour);
+            Palette oColour = getColour(ai.BusyStatus, ai.Categories, gColour);
             if (Sync.Engine.CompareAttribute("Colour", Sync.Direction.OutlookToGoogle, gColour.HexValue, oColour.HexValue, sb, ref itemModified)) {
                 ev.ColorId = oColour.Id;
             }
@@ -1286,7 +1286,7 @@ namespace OutlookGoogleCalendarSync.GoogleOgcs {
         /// <param name="gTransparency">Google's current setting</param>
         private String getAvailability(OlBusyStatus oBusyStatus, String gTransparency) {
             if (!Settings.Instance.SetEntriesAvailable)
-                return (oBusyStatus == OlBusyStatus.olFree) ? "transparent" : "opaque";
+                return (oBusyStatus == OlBusyStatus.olBusy) ? "opaque" : "transparent";
 
             if (Settings.Instance.SyncDirection != Sync.Direction.Bidirectional) {
                 return "transparent";
@@ -1313,7 +1313,9 @@ namespace OutlookGoogleCalendarSync.GoogleOgcs {
         /// </summary>
         /// <param name="aiCategories">The appointment item "categories" field</param>
         /// <returns>A match or a "null" Palette signifying no match</returns>
-        private Palette getColour(String aiCategories, Palette gColour) {
+        private Palette getColour(OlBusyStatus olBusyStatus, String aiCategories, Palette gColour) {
+            if (olBusyStatus != OlBusyStatus.olBusy) return ColourPalette.GetClosestColour(System.Drawing.Color.FromArgb(164, 189, 252));
+
             if (!Settings.Instance.AddColours && !Settings.Instance.SetEntriesColour) return Palette.NullPalette;
 
             OlCategoryColor? categoryColour = null;
