@@ -823,7 +823,9 @@ namespace OutlookGoogleCalendarSync.OutlookOgcs {
         /// <param name="oBusyStatus">Outlook's current setting</param>
         private OlBusyStatus getAvailability(String gTransparency, OlBusyStatus? oBusyStatus) {
             if (!Settings.Instance.SetEntriesAvailable)
-                return (gTransparency == "transparent") ? OlBusyStatus.olFree : OlBusyStatus.olBusy;
+                return oBusyStatus.HasValue
+                    ? oBusyStatus.Value
+                    : (gTransparency == "transparent") ? OlBusyStatus.olFree : OlBusyStatus.olBusy;
 
             if (Settings.Instance.SyncDirection != Sync.Direction.Bidirectional) {
                 return OlBusyStatus.olFree;
