@@ -865,7 +865,9 @@ namespace OutlookGoogleCalendarSync.OutlookOgcs {
         /// <param name="oBusyStatus">Outlook's current setting</param>
         private OlBusyStatus getAvailability(String gTransparency, OlBusyStatus? oBusyStatus) {
             if (!Settings.Instance.SetEntriesAvailable)
-                return (gTransparency == "transparent") ? OlBusyStatus.olFree : OlBusyStatus.olBusy;
+                return oBusyStatus.HasValue
+                    ? oBusyStatus.Value
+                    : (gTransparency == "transparent") ? OlBusyStatus.olFree : OlBusyStatus.olBusy;
 
             OlBusyStatus overrideFbStatus = OlBusyStatus.olFree;
             try {
